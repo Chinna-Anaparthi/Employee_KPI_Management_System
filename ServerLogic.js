@@ -667,8 +667,7 @@ const Save_Employee_Insert_Data = (req, res) => {
 const Save_Employee_Retrive_Data = (req, res) => {
   const { Empid, Value, Name } = req.params;
   let query = `
-      SELECT save_all_datastored_employee_table.Empid, save_all_datastored_employee_table.Empname, save_all_datastored_employee_table.Value, save_all_datastored_employee_table.Name, save_all_datastored_employee_table.Metric,save_all_datastored_employee_table.QuantityTarget,save_all_datastored_employee_table.QuantityAchieved,save_all_datastored_employee_table.IndexKpi,save_all_datastored_employee_table.Comments
-      FROM save_all_datastored_employee_table`;
+      SELECT * FROM save_all_datastored_employee_table`;
 
   if (Empid) {
     query += ` WHERE save_all_datastored_employee_table.Empid = ?`;
@@ -911,8 +910,7 @@ const Save_Manager_Insert_Data = (req, res) => {
 const Save_Manager_Retrive_Data = (req, res) => {
   const { Empid, Value, Name } = req.params;
   let query = `
-      SELECT save_all_datastored_manager_table.Empid, save_all_datastored_manager_table.Empname, save_all_datastored_manager_table.Value, save_all_datastored_manager_table.Name, save_all_datastored_manager_table.Metric,save_all_datastored_manager_table.QuantityTarget,save_all_datastored_manager_table.QuantityAchieved,save_all_datastored_manager_table.IndexKpi,save_all_datastored_manager_table.Comments
-      FROM save_all_datastored_manager_table`;
+      SELECT * FROM save_all_datastored_manager_table`;
 
   if (Empid) {
     query += ` WHERE save_all_datastored_manager_table.Empid = ?`;
@@ -1103,6 +1101,265 @@ const Save_Manager_Data_Delete = (req, res) => {
     });
   });
 };
+const Save_Director_Insert_Data =(req,res)=>
+{
+  const data = req.body;
+  if (
+    !data ||
+    !data[0] ||
+    !data[0].Empid ||
+    !data[0].Empname ||
+    !data[0].data ||
+    !Array.isArray(data[0].data)
+  ) {
+    return res.status(400).json({ error: "Invalid request body" });
+  }
+  const values = [];
+
+  for (const entry of data[0].data) {
+    const { Value, valuecreater } = entry;
+    for (const category of valuecreater) {
+      const { name, questions } = category;
+      for (const question of questions) {
+        const { Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments } =
+          question;
+
+        values.push([
+          data[0].Empid,
+          data[0].Empname,
+          Value,
+          name,
+          Metric,
+          QuantityTarget,
+          QuantityAchieved,
+          IndexKpi,
+          Comments,
+        ]);
+      }
+    }
+  }
+  const insertQuery = `INSERT INTO save_all_datastored_director_table (Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments) VALUES ?`;
+  Database_Kpi.query(insertQuery, [values], (err, result) => {
+    if (err) {
+      console.error("Error storing data:", err);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while storing data." });
+    }
+    return res.json({
+      success: true,
+      message: "Save_director_Data stored successfully",
+    });
+  });
+}
+const Save_Director_Retrive_Data =(req,res)=>
+{
+  const { Empid, Value, Name } = req.params;
+  let query = `
+    SELECT * FROM save_all_datastored_director_table`;
+
+  // Check if Empid is provided in the URL
+  if (Empid) {
+    query += ` WHERE save_all_datastored_manager_table.Empid = ?`;
+
+    // If Values is provided, filter by Values
+    if (Value) {
+      query += ` AND save_all_datastored_manager_table.Value = ?`;
+
+      // If Name is provided, filter by Name
+      if (Name) {
+        query += ` AND save_all_datastored_manager_table.Name = ?;`;
+      } else {
+        query += `;`;
+      }
+    } else {
+      query += `;`;
+    }
+
+    const queryParams = [Empid];
+
+    if (Value) {
+      queryParams.push(Value);
+    }
+
+    if (Name) {
+      queryParams.push(Name);
+    }
+
+    Database_Kpi.query(query, queryParams, (err, result) => {
+      if (err) {
+        console.error("Error fetching data:", err);
+        return res
+          .status(500)
+          .json({ error: "An error occurred while fetching data" });
+      }
+
+      if (result.length === 0) {
+        return res
+          .status(404)
+          .json({ error: `Employee with Empid ${Empid} not found` });
+      }
+
+      const employeeData = {
+        Empid: result[0].Empid,
+        Empname: result[0].Empname,
+        ratings: result.map((row) => ({
+          Value: row.Value,
+          Name: row.Name,
+          Metric: row.Metric,
+          QuantityTarget: row.QuantityTarget,
+          QuantityAchieved: row.QuantityAchieved,
+          IndexKpi: row.IndexKpi,
+          Comments: row.Comments,
+        })),
+      };
+
+      res.status(200).json({ employee: employeeData });
+    });
+  } else {
+    Database_Kpi.query(query, (err, result) => {
+      if (err) {
+        console.error("Error fetching data:", err);
+        return res
+          .status(500)
+          .json({ error: "An error occurred while fetching data" });
+      }
+
+      const employeesData = {};
+      result.forEach((row) => {
+        if (!employeesData[row.Empid]) {
+          employeesData[row.Empid] = {
+            Empid: row.Empid,
+            Empname: row.Empname,
+            ratings: [],
+          };
+        }
+        employeesData[row.Empid].ratings.push({
+          Value: row.Value,
+          Name: row.Name,
+          Metric: row.Metric,
+          QuantityTarget: row.QuantityTarget,
+          QuantityAchieved: row.QuantityAchieved,
+          IndexKpi: row.IndexKpi,
+          Comments: row.Comments,
+        });
+      });
+
+      const employees = Object.values(employeesData);
+      res.status(200).json({ employees });
+    });
+  } 
+}
+const Save_Director_Update_Data =(req,res)=>
+{
+  const { Data } = req.body;
+  const { Empid } = req.params; // Extract Empid from URL parameters.
+
+  // Check if 'Data' is missing or not an array.
+  if (!Data || !Array.isArray(Data)) {
+    return res.status(400).json({ error: "Invalid request data" });
+  }
+
+  // SQL update query template.
+  const updateQuery = `
+        UPDATE save_all_datastored_director_table
+        SET QuantityTarget = ?,
+            QuantityAchieved = ?,
+            IndexKpi = ?,
+            Comments = ?
+        WHERE 
+            Empid = ? AND
+            Value = ? AND
+            Name = ? AND
+            Metric = ?`;
+
+  const promises = [];
+
+  // Iterate over the 'Data' array and create promises for each data item to update the database.
+  Data.forEach((item) => {
+    const {
+      Value,
+      Name,
+      Metric,
+      QuantityTarget,
+      QuantityAchieved,
+      IndexKpi,
+      Comments,
+    } = item;
+    promises.push(
+      new Promise((resolve, reject) => {
+        // Execute the SQL update query using the 'Database_Kpi' object.
+        Database_Kpi.query(
+          updateQuery,
+          [
+            QuantityTarget,
+            QuantityAchieved,
+            IndexKpi,
+            Comments,
+            Empid,
+            Value,
+            Name,
+            Metric,
+          ],
+          (err, result) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+      })
+    );
+  });
+
+  // Wait for all update promises to complete.
+  Promise.all(promises)
+    .then(() => {
+      return res.json({
+        success: true,
+        message: "Save_Director_Data updated successfully",
+      });
+    })
+    .catch((err) => {
+      console.error("Error updating data:", err);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while updating data." });
+    }); 
+}
+const Save_Director_Delete_Data =(req,res)=>
+{
+  const { Empid } = req.params;
+
+  if (!Empid) {
+    return res.status(400).json({ error: "Invalid Empid provided" });
+  }
+
+  const deleteQuery = `
+      DELETE FROM save_all_datastored_director_table WHERE Empid = ?;
+    `;
+
+  Database_Kpi.query(deleteQuery, [Empid], (err, result) => {
+    if (err) {
+      console.error("Error deleting employee data:", err);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while deleting employee data." });
+    }
+
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ error: "Employee data not found for the provided Empid." });
+    }
+
+    return res.json({
+      success: true,
+      message: "Saved_Manager data deleted successfully",
+    });
+  });
+}
 module.exports = {
   AdminPost,
   AdminloginPost,
@@ -1122,5 +1379,9 @@ module.exports = {
   Save_Manager_Insert_Data,
   Save_Manager_Retrive_Data,
   Save_Manager_Data_Update,
-  Save_Manager_Data_Delete
+  Save_Manager_Data_Delete,
+  Save_Director_Insert_Data,
+  Save_Director_Retrive_Data,
+  Save_Director_Update_Data,
+  Save_Director_Delete_Data
 };

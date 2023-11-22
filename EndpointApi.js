@@ -69,6 +69,18 @@ app.put("/SaveManagerDataKPIUpdate/:Empid", (req, res, next) => {
 app.delete("/SaveManagerDataKPIDelete/:Empid", (req, res, next) => {
   Server_Logic.Save_Manager_Data_Delete(req, res, () => { });
 });
+app.post("/SaveDirectorDataKPIPost", (req, res, next) => { 
+  Server_Logic.Save_Director_Insert_Data(req, res, () => { }); 
+});
+app.get("/SaveDirectorDataKPIGet/:Empid?/:Value?/:Name?", (req, res, next) => {
+  Server_Logic.Save_Director_Retrive_Data(req, res, () => { });
+});
+app.put("/SaveDirectorDataKPIUpdate/:Empid", (req, res, next) => {
+  Server_Logic.Save_Director_Update_Data(req, res, () => { });
+});
+app.delete("/SaveDirectorDataKPIDelete/:Empid", (req, res, next) => {
+  Server_Logic.Save_Director_Delete_Data(req, res, () => { });
+});
 app.listen(port, () => {
   console.log(`Server listening on port http://localhost:${port}`);
 });

@@ -120,7 +120,7 @@ exports.handler = async (event) => {
       result =  Server_Logic.Admin_Manager_Insert_Data(body);
     }else if (event.path === '/AdminManagerGet' && event.httpMethod === 'GET') {
       result =  Server_Logic.Admin_Manager_Retrive_Data(body);
-    }else if (event.path === '//AdminManagerDelete/:adminID/:category?/:name?/:questions?' && event.httpMethod === 'DELETE') {
+    }else if (event.path === '/AdminManagerDelete/:adminID/:category?/:name?/:questions?' && event.httpMethod === 'DELETE') {
       result =  Server_Logic.Admin_Manager_Data_Delete(body);
     }else if (event.path === '/SaveEmpoyeeDataKPIPost' && event.httpMethod === 'POST') {
       result =  Server_Logic.Save_Employee_Insert_Data(body);

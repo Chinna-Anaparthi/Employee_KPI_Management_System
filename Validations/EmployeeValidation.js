@@ -101,6 +101,11 @@ const KPISchema = joi.object({
       "string.min": "The Location should have Minimum 2 characters",
       "string.max": "The Location should have Maximum 15 characters",
       "any.required": "Location cannot be empty",
+    }),
+    Image: joi
+    .string()
+    .messages({
+      "any.required": "Location cannot be empty",
     })
 
 

@@ -146,6 +146,28 @@ app.get("/EmployeeAllStatusKPIGet/:Empid?", (req, res, next) => {
   Server_Logic.Employee_All_Status_Retrieve(req, res, () => {});
 });
 
+//Employee-Manager-Data
+app.post("/EmployeeManagerDataKPIPost", (req, res, next) => {
+  Server_Logic.Employee_And_Manager_Insert_Data(req, res, () => { });
+});
+app.get("/EmployeeManagerDataKPIGet/:Empid?/:Value?/:Name?", (req, res, next) => {
+  Server_Logic.Employee_And_Manager_Retrive_Data(req, res, () => { });
+});
+app.put("/EmployeeManagerDataKPIUpdate/:Empid/:Value?/:Name?", (req, res, next) => {
+  Server_Logic.Employee_And_Manager_Data_Update(req, res, () => { }); 
+});
+
+//Employee-Director-Data
+app.post("/EmployeeDirectorDataKPIPost", (req, res, next) => {
+  Server_Logic.Employee_And_Director_Insert_Data(req, res, () => { });
+});
+app.get("/EmployeeDirectorDataKPIGet/:Empid/:Value?/:Name?", (req, res, next) => {
+  Server_Logic.Employee_And_Director_Retrive_Data(req, res, () => { });
+}); 
+app.put("/EmployeeDirectorDataKPIUpdate/:Empid/:Value?/:Name?", (req, res, next) => {
+  Server_Logic.Employee_And_Director_Data_Update(req, res, () => { });
+});
+
 //Manager-Data
 app.post("/ManagerDataKPIPost", (req, res, next) => {
   Server_Logic.Manager_Insert_Data(req, res, () => { });
@@ -166,6 +188,17 @@ app.get("/ManagerAllStatusKPIGet/:Empid?", (req, res, next) => {
   Server_Logic.Manager_All_Status_Retrieve(req, res, () => { });
 });
 
+//Manager-Director-Data
+app.post("/ManagerDirectorDataKPIPost", (req, res, next) => {
+  Server_Logic.Manager_Director_Insert_Data(req, res, () => { });
+});
+app.get("/ManagerDirectorDataKPIGet/:Empid?/:Value?/:Name?", (req, res, next) => {
+  Server_Logic.Manager_Director_Retrive_Data(req, res, () => { });
+});
+app.put("/ManagerDirectorDataKPIUpdate/:Empid/:Value?/:Name?", (req, res, next) => {
+  Server_Logic.Manager_Director_Data_Update(req, res, () => { }); 
+});
+
 //Director-Data
 app.post("/DirectorDataKPIPost", (req, res, next) => {
   Server_Logic.Director_Insert_Data(req, res, () => { });
@@ -184,6 +217,17 @@ app.put("/DirectorStatusUpdate/:Empid", (req, res, next) => {
 });
 app.get("/DirectorAllStatusGet/:Empid?", (req, res, next) => {
   Server_Logic.Directror_All_Status_Retrive(req, res, () => { });
+});
+
+//Director-Manager-Data
+app.post("/DirectorManagerDataKPIPost", (req, res, next) => {
+  Server_Logic.Director_Manager_Insert_Data(req, res, () => { });
+});
+app.get("/DirectorManagerDataKPIGet/:Empid?/:Value?/:Name?", (req, res, next) => {
+  Server_Logic.Director_Manager_Retrive_Data(req, res, () => { });
+});
+app.put("/DirectorManagerDataKPIUpdate/:Empid/:Value?/:Name?", (req, res, next) => {
+  Server_Logic.Director_Manager_Data_Update(req, res, () => { }); 
 });
 
 

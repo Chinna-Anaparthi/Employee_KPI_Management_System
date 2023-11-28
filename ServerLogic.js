@@ -1447,6 +1447,7 @@ const Save_Director_Delete_Data =(req,res)=>
     });
   });
 }
+
 //mail-function
 function sendDeclineEmail(Email, subject, text, callback) {
   const transporter = nodemailer.createTransport({
@@ -1473,6 +1474,225 @@ function sendDeclineEmail(Email, subject, text, callback) {
     }
   });
 }
+
+//Employee-Registration
+const registrationPost = (req, res) => {
+  const validation = validations.validate(req.body);
+
+  if (validation.error) {
+    return res.status(400).json({ error: validation.error.details[0].message });
+  }
+  const {
+    Empid,
+    Empmail,
+    Firstname,
+    Lastname,
+    Role,
+    Practies,
+    Reportingmanager,
+    Password,
+    Reportinghr,
+    Location,
+    Image
+  } = req.body;
+  const checkQuery =
+    "SELECT * FROM employeeregister_data WHERE Empid = ? OR Empmail = ?";
+  const checkValues = [Empid, Empmail];
+
+  Database_Kpi.query(checkQuery, checkValues, (checkErr, checkResults) => {
+    if (checkErr) {
+      console.error(checkErr);
+      return res
+        .status(500)
+        .json({
+          error: "An error occurred while checking for existing records.",
+        });
+    }
+
+    if (checkResults.length > 0) {
+      return res
+        .status(400)
+        .json({
+          error: "User with the same Empid or Empmail already registered.",
+        });
+    }
+    const query = `
+            INSERT INTO employeeregister_data (
+                Empid,
+                Empmail,
+                Firstname,
+                Lastname,
+                Role,
+                Practies,
+                Reportingmanager,
+                Reportinghr,
+                Password,
+                Location,
+                Image
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    const values = [
+      Empid,
+      Empmail,
+      Firstname,
+      Lastname,
+      Role,
+      Practies,
+      Reportingmanager,
+      Reportinghr,
+      Password, 
+      Location,
+      Image,
+    ];
+
+    Database_Kpi.query(query, values, (err, resp) => {
+      if (err) {
+        console.error(err);
+        return res
+          .status(500)
+          .json({ error: "An error occurred while registering the employee." });
+      }
+      return res.json({ message: "Employee successfully registered." });
+    });
+  });
+};
+const loginPost = (req, res) => {
+  const query =
+    "SELECT * FROM employeeregister_data WHERE Empmail = '" +
+    req.body.Empmail +
+    "' AND Password = '" +
+    req.body.Password +
+    "'";
+  Database_Kpi.query(query, (error, results) => {
+    if (error) {
+      console.error("Error fetching user data:", error);
+      res.status(500).json({ error: "An error occurred while logging in" });
+    } else {
+      if (results.length > 0) {
+        const user = results[0];
+        const payload = {
+          id:user.id,
+          Empid: user.Empid,
+          Empmail: user.Empmail,
+          Firstname: user.Firstname,
+          Lastname: user.Lastname,
+          Role: user.Role,
+          Practies: user.Practies,
+          Reportingmanager: user.Reportingmanager,
+          Reportinghr: user.Reportinghr,
+          Password: user.Password,
+          Location: user.Location,
+          Image: user.Image,
+        };
+        jwt.sign(payload, secretKey, { expiresIn: "1hr" }, (err, token) => {
+          if (err) {
+            res
+              .status(500)
+              .json({ error: "An error occurred while generating token" });
+          } else {
+            res.status(200).json({ message: "Login successful", token });
+          }
+        });
+      } else {
+        res.status(401).json({ message: "User not found" });
+      }
+    }
+  });
+};
+const registrationGet = (req, res) => {
+  const { Empid } = req.params;
+
+  if (Empid) {
+    const query = "SELECT * FROM employeeregister_data WHERE Empid = ?";
+    const values = [Empid];
+
+    Database_Kpi.query(query, values, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res
+          .status(500)
+          .json({ error: "An error occurred while fetching KPI data." });
+      }
+      if (result.length === 0) {
+        return res
+          .status(404)
+          .json({
+            error: "Employee KPI data for the provided Empid not found.",
+          });
+      }
+      return res.status(200).json({ message: result });
+    });
+  } else {
+    const query = "SELECT * FROM employeeregister_data";
+    Database_Kpi.query(query, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res
+          .status(500)
+          .json({ error: "An error occurred while fetching KPI data." });
+      }
+      return res.status(200).json({ message: result });
+    });
+  }
+};
+const PasswordUpdate = (req, res) => {
+  const { Empmail, Password } = req.body;
+  if (!Empmail || !Password) {
+    return res
+      .status(400)
+      .json({ error: "Empmail and Password are required." });
+  }
+  const updateQuery =
+    "UPDATE employeeregister_data SET Password = ? WHERE Empmail = ?";
+  const updateValues = [Password, Empmail];
+
+  Database_Kpi.query(updateQuery, updateValues, (updateErr, updateResults) => {
+    if (updateErr) {
+      console.error(updateErr);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while updating the password." });
+    }
+
+    if (updateResults.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ error: "Employee with the provided Empmail not found." });
+    }
+    return res.json({ message: "Password updated successfully." });
+  });
+};
+const ImageUpdate = (req, res) => {
+  const { FirstName, LastName } = req.params;
+  const {Image}=req.body;
+  if (!FirstName || !LastName) {
+    return res
+      .status(400)
+      .json({ error: "FirstName and LastName are required." });
+  }
+  const updateQuery =
+    "UPDATE employeeregister_data SET Image = ? WHERE FirstName = ? AND LastName = ?";
+  const updateValues = [Image, FirstName, LastName];
+
+  Database_Kpi.query(updateQuery, updateValues, (updateErr, updateResults) => {
+    if (updateErr) {
+      console.error(updateErr);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while updating the image." });
+    }
+
+    if (updateResults.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({
+          error: "Employee with the provided FirstName and LastName not found.",
+        });
+    }
+
+    return res.json({ message: "Image updated successfully." });
+  });
+};
 //Employee-Data
 const Employee_Insert_Data = (req, res) => {
   const data = req.body;
@@ -1831,223 +2051,373 @@ const Employee_All_Status_Retrieve = (req, res) => {
   });
 };
 
-//Employee-Registration
-const registrationPost = (req, res) => {
-  const validation = validations.validate(req.body);
-
-  if (validation.error) {
-    return res.status(400).json({ error: validation.error.details[0].message });
+//Employee-Manager-Data
+const Employee_And_Manager_Insert_Data = (req, res) => {
+  const data = req.body;
+  if (
+    !data ||
+    !data[0] ||
+    !data[0].Empid ||
+    !data[0].Empname ||
+    !data[0].data ||
+    !Array.isArray(data[0].data)
+  ) {
+    return res.status(400).json({ error: "Invalid request body" });
   }
-  const {
-    Empid,
-    Empmail,
-    Firstname,
-    Lastname,
-    Role,
-    Practies,
-    Reportingmanager,
-    Password,
-    Reportinghr,
-    Location,
-    Image
-  } = req.body;
-  const checkQuery =
-    "SELECT * FROM employeeregister_data WHERE Empid = ? OR Empmail = ?";
-  const checkValues = [Empid, Empmail];
+  const values = [];
 
-  Database_Kpi.query(checkQuery, checkValues, (checkErr, checkResults) => {
-    if (checkErr) {
-      console.error(checkErr);
+  for (const entry of data[0].data) {
+    const { Value, valuecreater } = entry;
+    for (const category of valuecreater) {
+      const { name, questions } = category;
+      for (const question of questions) {
+        const {
+          Metric,
+          QuantityTarget,
+          QuantityAchieved,
+          IndexKpi,
+          Comments,
+          ManagerRating,
+          ManagerComments,
+        } = question;
+
+        values.push([
+          data[0].Empid,
+          data[0].Empname,
+          Value,
+          name,
+          Metric,
+          QuantityTarget,
+          QuantityAchieved,
+          IndexKpi,
+          Comments,
+          ManagerRating,
+          ManagerComments,
+        ]);
+      }
+    }
+  }
+  const insertQuery = `INSERT INTO all_datastored_employeemanager_table (Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments,ManagerRating,ManagerComments) VALUES ?`;
+  Database_Kpi.query(insertQuery, [values], (err, result) => {
+    if (err) {
+      console.error("Error storing data:", err);
       return res
         .status(500)
-        .json({
-          error: "An error occurred while checking for existing records.",
-        });
+        .json({ error: "An error occurred while storing data." });
     }
-
-    if (checkResults.length > 0) {
-      return res
-        .status(400)
-        .json({
-          error: "User with the same Empid or Empmail already registered.",
-        });
-    }
-    const query = `
-            INSERT INTO employeeregister_data (
-                Empid,
-                Empmail,
-                Firstname,
-                Lastname,
-                Role,
-                Practies,
-                Reportingmanager,
-                Reportinghr,
-                Password,
-                Location,
-                Image
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-    const values = [
-      Empid,
-      Empmail,
-      Firstname,
-      Lastname,
-      Role,
-      Practies,
-      Reportingmanager,
-      Reportinghr,
-      Password, 
-      Location,
-      Image,
-    ];
-
-    Database_Kpi.query(query, values, (err, resp) => {
-      if (err) {
-        console.error(err);
-        return res
-          .status(500)
-          .json({ error: "An error occurred while registering the employee." });
-      }
-      return res.json({ message: "Employee successfully registered." });
+    return res.json({
+      success: true,
+      message: "Employee_Manager_Data stored successfully",
     });
   });
 };
-const loginPost = (req, res) => {
-  const query =
-    "SELECT * FROM employeeregister_data WHERE Empmail = '" +
-    req.body.Empmail +
-    "' AND Password = '" +
-    req.body.Password +
-    "'";
-  Database_Kpi.query(query, (error, results) => {
-    if (error) {
-      console.error("Error fetching user data:", error);
-      res.status(500).json({ error: "An error occurred while logging in" });
-    } else {
-      if (results.length > 0) {
-        const user = results[0];
-        const payload = {
-          id:user.id,
-          Empid: user.Empid,
-          Empmail: user.Empmail,
-          Firstname: user.Firstname,
-          Lastname: user.Lastname,
-          Role: user.Role,
-          Practies: user.Practies,
-          Reportingmanager: user.Reportingmanager,
-          Reportinghr: user.Reportinghr,
-          Password: user.Password,
-          Location: user.Location,
-          Image: user.Image,
-        };
-        jwt.sign(payload, secretKey, { expiresIn: "1hr" }, (err, token) => {
-          if (err) {
-            res
-              .status(500)
-              .json({ error: "An error occurred while generating token" });
-          } else {
-            res.status(200).json({ message: "Login successful", token });
-          }
-        });
-      } else {
-        res.status(401).json({ message: "User not found" });
-      }
-    }
-  });
-};
-const registrationGet = (req, res) => {
-  const { Empid } = req.params;
+const Employee_And_Manager_Retrive_Data = (req, res) => {
+  const { Empid, Value, Name } = req.params;
+  // const {Name}=req.params.Name || '';
+  let selectQuery = `
+        SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments,ManagerRating,ManagerComments
+        FROM all_datastored_employeemanager_table
+        WHERE 1`;
+
+  const queryParams = [];
 
   if (Empid) {
-    const query = "SELECT * FROM employeeregister_data WHERE Empid = ?";
-    const values = [Empid];
-
-    Database_Kpi.query(query, values, (err, result) => {
-      if (err) {
-        console.error(err);
-        return res
-          .status(500)
-          .json({ error: "An error occurred while fetching KPI data." });
-      }
-      if (result.length === 0) {
-        return res
-          .status(404)
-          .json({
-            error: "Employee KPI data for the provided Empid not found.",
-          });
-      }
-      return res.status(200).json({ message: result });
-    });
-  } else {
-    const query = "SELECT * FROM employeeregister_data";
-    Database_Kpi.query(query, (err, result) => {
-      if (err) {
-        console.error(err);
-        return res
-          .status(500)
-          .json({ error: "An error occurred while fetching KPI data." });
-      }
-      return res.status(200).json({ message: result });
-    });
+    selectQuery += " AND Empid = ?";
+    queryParams.push(Empid);
   }
-};
-const PasswordUpdate = (req, res) => {
-  const { Empmail, Password } = req.body;
-  if (!Empmail || !Password) {
-    return res
-      .status(400)
-      .json({ error: "Empmail and Password are required." });
-  }
-  const updateQuery =
-    "UPDATE employeeregister_data SET Password = ? WHERE Empmail = ?";
-  const updateValues = [Password, Empmail];
 
-  Database_Kpi.query(updateQuery, updateValues, (updateErr, updateResults) => {
-    if (updateErr) {
-      console.error(updateErr);
+  if (Value) {
+    selectQuery += " AND Value = ?";
+    queryParams.push(Value);
+  }
+
+  if (Name) {
+    selectQuery += " AND Name = ?";
+    queryParams.push(Name);
+  }
+  Database_Kpi.query(selectQuery, queryParams, (err, result) => {
+    if (err) {
+      console.error("Error fetching data:", err);
       return res
         .status(500)
-        .json({ error: "An error occurred while updating the password." });
+        .json({ error: "An error occurred while fetching data." });
     }
 
-    if (updateResults.affectedRows === 0) {
-      return res
-        .status(404)
-        .json({ error: "Employee with the provided Empmail not found." });
-    }
-    return res.json({ message: "Password updated successfully." });
-  });
-};
-const ImageUpdate = (req, res) => {
-  const { FirstName, LastName } = req.params;
-  const {Image}=req.body;
-  if (!FirstName || !LastName) {
-    return res
-      .status(400)
-      .json({ error: "FirstName and LastName are required." });
-  }
-  const updateQuery =
-    "UPDATE employeeregister_data SET Image = ? WHERE FirstName = ? AND LastName = ?";
-  const updateValues = [Image, FirstName, LastName];
+    const formattedData = [];
+    let currentEmpid = null;
+    let currentValue = null;
+    let currentName = null;
 
-  Database_Kpi.query(updateQuery, updateValues, (updateErr, updateResults) => {
-    if (updateErr) {
-      console.error(updateErr);
-      return res
-        .status(500)
-        .json({ error: "An error occurred while updating the image." });
-    }
+    result.forEach((item) => {
+      if (
+        currentEmpid !== item.Empid ||
+        currentValue !== item.Value ||
+        currentName !== item.Name
+      ) {
+        currentEmpid = item.Empid;
+        currentValue = item.Value;
+        currentName = item.Name;
 
-    if (updateResults.affectedRows === 0) {
-      return res
-        .status(404)
-        .json({
-          error: "Employee with the provided FirstName and LastName not found.",
+        formattedData.push({
+          Empid: item.Empid,
+          Empname: item.Empname,
+          Value: item.Value,
+          Name: item.Name,
+          Data: [],
         });
+      }
+
+      const lastIndex = formattedData.length - 1;
+      formattedData[lastIndex].Data.push({
+        Metric: item.Metric,
+        QuantityTarget: item.QuantityTarget,
+        QuantityAchieved: item.QuantityAchieved,
+        IndexKpi: item.IndexKpi,
+        Comments: item.Comments,
+        ManagerRating: item.ManagerRating,
+        ManagerComments: item.ManagerComments,
+      });
+    });
+
+    return res.json({ success: true, data: formattedData });
+  });
+};
+const Employee_And_Manager_Data_Update = (req, res) => {
+  const { Data } = req.body;
+  const { Value, Name, Empid } = req.params;
+
+  if (!Value || !Name || !Empid || !Data || !Array.isArray(Data)) {
+    return res.status(400).json({ error: "Invalid request data" });
+  }
+
+  const updateQuery = `
+        UPDATE all_datastored_employeemanager_table
+        SET ManagerRating = ?,
+        ManagerComments =?
+        WHERE Empid = ? AND Value = ? AND Name = ? AND Metric = ?`;
+
+  const promises = [];
+
+  Data.forEach((item) => {
+    const { Metric, ManagerRating, ManagerComments } = item;
+    promises.push(
+      new Promise((resolve, reject) => {
+        Database_Kpi.query(
+          updateQuery,
+          [ManagerRating, ManagerComments, Empid, Value, Name, Metric],
+          (err, result) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+      })
+    );
+  });
+
+  Promise.all(promises)
+    .then(() => {
+      return res.json({
+        success: true,
+        message: "Employee_Manager_Data updated successfully",
+      });
+    })
+    .catch((err) => {
+      console.error("Error updating data:", err);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while updating data." });
+    });
+};
+
+//Employee-Director-Data
+const Employee_And_Director_Insert_Data = (req, res) => {
+  const data = req.body;
+  if (
+    !data ||
+    !data[0] ||
+    !data[0].Empid ||
+    !data[0].Empname ||
+    !data[0].data ||
+    !Array.isArray(data[0].data)
+  ) {
+    return res.status(400).json({ error: "Invalid request body" });
+  }
+  const values = [];
+
+  for (const entry of data[0].data) {
+    const { Value, valuecreater } = entry;
+    for (const category of valuecreater) {
+      const { name, questions } = category;
+      for (const question of questions) {
+        const {
+          Metric,
+          QuantityTarget,
+          QuantityAchieved,
+          IndexKpi,
+          Comments,
+          ManagerRating,
+          ManagerComments,
+          DirectorRating,
+          DirectorComments,
+        } = question;
+
+        values.push([
+          data[0].Empid,
+          data[0].Empname,
+          Value,
+          name,
+          Metric,
+          QuantityTarget,
+          QuantityAchieved,
+          IndexKpi,
+          Comments,
+          ManagerRating,
+          ManagerComments,
+          DirectorRating,
+          DirectorComments,
+        ]);
+      }
+    }
+  }
+  const insertQuery = `INSERT INTO all_datastored_employeedirector_table (Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments,ManagerRating,ManagerComments,DirectorRating,DirectorComments) VALUES ?`;
+  Database_Kpi.query(insertQuery, [values], (err, result) => {
+    if (err) {
+      console.error("Error storing data:", err);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while storing data." });
+    }
+    return res.json({
+      success: true,
+      message: "Employee_Director_Data stored successfully",
+    });
+  });
+};
+const Employee_And_Director_Retrive_Data = (req, res) => {
+  const { Empid, Value, Name } = req.params;
+
+  let selectQuery = `
+        SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments,ManagerRating,ManagerComments,DirectorRating,DirectorComments
+        FROM all_datastored_employeedirector_table
+        WHERE 1`;
+
+  const queryParams = [];
+
+  if (Empid) {
+    selectQuery += " AND Empid = ?";
+    queryParams.push(Empid);
+  }
+
+  if (Value) {
+    selectQuery += " AND Value = ?";
+    queryParams.push(Value);
+  }
+
+  if (Name) {
+    selectQuery += " AND Name = ?";
+    queryParams.push(Name);
+  }
+
+  Database_Kpi.query(selectQuery, queryParams, (err, result) => {
+    if (err) {
+      console.error("Error fetching data:", err);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while fetching data." });
     }
 
-    return res.json({ message: "Image updated successfully." });
+    const formattedData = [];
+    let currentEmpid = null;
+    let currentValue = null;
+    let currentName = null;
+
+    result.forEach((item) => {
+      if (
+        currentEmpid !== item.Empid ||
+        currentValue !== item.Value ||
+        currentName !== item.Name
+      ) {
+        currentEmpid = item.Empid;
+        currentValue = item.Value;
+        currentName = item.Name;
+
+        formattedData.push({
+          Empid: item.Empid,
+          Empname: item.Empname,
+          Value: item.Value,
+          Name: item.Name,
+          Data: [],
+        });
+      }
+
+      const lastIndex = formattedData.length - 1;
+      formattedData[lastIndex].Data.push({
+        Metric: item.Metric,
+        QuantityTarget: item.QuantityTarget,
+        QuantityAchieved: item.QuantityAchieved,
+        IndexKpi: item.IndexKpi,
+        Comments: item.Comments,
+        ManagerRating: item.ManagerRating,
+        ManagerComments: item.ManagerComments,
+        DirectorRating: item.DirectorRating,
+        DirectorComments: item.DirectorComments,
+      });
+    });
+
+    return res.json({ success: true, data: formattedData });
   });
+};
+const Employee_And_Director_Data_Update = (req, res) => {
+  const { Data } = req.body;
+  const { Value, Name, Empid } = req.params;
+
+  if (!Value || !Name || !Empid || !Data || !Array.isArray(Data)) {
+    return res.status(400).json({ error: "Invalid request data" });
+  }
+
+  const updateQuery = `
+        UPDATE all_datastored_employeedirector_table
+        SET DirectorRating = ?,
+        DirectorComments =?
+        WHERE Empid = ? AND Value = ? AND Name = ? AND Metric = ?`;
+
+  const promises = [];
+
+  Data.forEach((item) => {
+    const { Metric, DirectorRating, DirectorComments } = item;
+    promises.push(
+      new Promise((resolve, reject) => {
+        Database_Kpi.query(
+          updateQuery,
+          [DirectorRating, DirectorComments, Empid, Value, Name, Metric],
+          (err, result) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+      })
+    );
+  });
+
+  Promise.all(promises)
+    .then(() => {
+      return res.json({
+        success: true,
+        message: "Employee_Director_Data updated successfully",
+      });
+    })
+    .catch((err) => {
+      console.error("Error updating data:", err);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while updating data." });
+    });
 };
 
 //Manager-Data
@@ -2238,86 +2608,6 @@ const Manager_Data_Update = (req, res) => {
     });
 };
 const Manager_All_Data_Retrieve = (req, res) => {
-  // const { Empid, Value, Name } = req.query;
-
-  // //    if(Empid){
-  // let query = `
-  // SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments
-  // FROM all_datastored_managerdata_table`;
-  // const queryParams = [];
-  // if (Empid) {
-  //     query += ` WHERE Empid = ?`;
-  //     queryParams.push(Empid);
-
-  //     if (Value) {
-  //         query += ` AND Value = ?`;
-  //         queryParams.push(Value);
-
-  //         if (Name) {
-  //             query += ` AND Name = ?`;
-  //             queryParams.push(Name);
-  //         }
-  //     }
-  // }
-
-  // Database_Kpi.query(query, queryParams, (err, result) => {
-  //     if (err) {
-  //         console.error('Error fetching data:', err);
-  //         return res.status(500).json({ error: 'An error occurred while fetching data' });
-  //     }
-
-  //     if (result.length === 0) {
-  //         if (Empid) {
-  //             return res.status(404).json({ error: `Employee with Empid ${Empid} not found` });
-  //         } else {
-  //             return res.status(404).json({ error: 'No employees found' });
-  //         }
-  //     }
-
-  //     if (Empid) {
-  //         const employeeData = {
-  //             Empid: result[0].Empid,
-  //             Empname: result[0].Empname,
-  //             ratings: result.map((row) => ({
-  //                 Value: row.Value,
-  //                 Name: row.Name,
-  //                 Metric: row.Metric,
-  //                 QuantityTarget: row.QuantityTarget,
-  //                 QuantityAchieved: row.QuantityAchieved,
-  //                 IndexKpi: row.IndexKpi,
-  //                 Comments: row.Comments,
-  //             })),
-  //         };
-  //         res.status(200).json({ employee: employeeData });
-  //     } else {
-  //         const employeesData = {};
-  //         result.forEach((row) => {
-  //             if (!employeesData[row.Empid]) {
-  //                 employeesData[row.Empid] = {
-  //                     Empid: row.Empid,
-  //                     Empname: row.Empname,
-  //                     ratings: [],
-  //                 };
-  //             }
-  //             employeesData[row.Empid].ratings.push({
-  //                 Value: row.Value,
-  //                 Name: row.Name,
-  //                 Metric: row.Metric,
-  //                 QuantityTarget: row.QuantityTarget,
-  //                 QuantityAchieved: row.QuantityAchieved,
-  //                 IndexKpi: row.IndexKpi,
-  //                 Comments: row.Comments,
-  //             });
-  //         });
-
-  //         const employees = Object.values(employeesData);
-  //         res.status(200).json({ "status": true, employees });
-  //     }
-  // });
-  // // }
-  // // else {
-  // //     res.status(400).json({ error: 'Empid should be provided' });
-  // // }
   const { Empid, Value, Name } = req.params;
   let query = `
     SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments
@@ -2503,6 +2793,188 @@ const Manager_All_Status_Retrieve = (req, res) => {
       res.status(200).json({ status: true, employees });
     }
   });
+};
+
+//Manager-Director-Data
+const Manager_Director_Insert_Data = (req, res) => {
+  const data = req.body;
+  if (
+    !data ||
+    !data[0] ||
+    !data[0].Empid ||
+    !data[0].Empname ||
+    !data[0].data ||
+    !Array.isArray(data[0].data)
+  ) {
+    return res.status(400).json({ error: "Invalid request body" });
+  }
+  const values = [];
+
+  for (const entry of data[0].data) {
+    const { Value, valuecreater } = entry;
+    for (const category of valuecreater) {
+      const { name, questions } = category;
+      for (const question of questions) {
+        const {
+          Metric,
+          QuantityTarget,
+          QuantityAchieved,
+          IndexKpi,
+          Comments,
+          DirectorRating,
+          DirectorComments,
+        } = question;
+
+        values.push([
+          data[0].Empid,
+          data[0].Empname,
+          Value,
+          name,
+          Metric,
+          QuantityTarget,
+          QuantityAchieved,
+          IndexKpi,
+          Comments,
+          DirectorRating,
+          DirectorComments,
+        ]);
+      }
+    }
+  }
+  const insertQuery = `INSERT INTO all_datastored_directordata_table (Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments,DirectorRating,DirectorComments) VALUES ?`;
+  Database_Kpi.query(insertQuery, [values], (err, result) => {
+    if (err) {
+      console.error("Error storing data:", err);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while storing data." });
+    }
+    return res.json({
+      success: true,
+      message: "Manager_Director_Data stored successfully",
+    });
+  });
+};
+const Manager_Director_Retrive_Data = (req, res) => {
+  const { Empid, Value, Name } = req.params;
+
+  let selectQuery = `
+        SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments,DirectorRating,DirectorComments
+        FROM all_datastored_directordata_table
+        WHERE 1`;
+
+  const queryParams = [];
+
+  if (Empid) {
+    selectQuery += " AND Empid = ?";
+    queryParams.push(Empid);
+  }
+
+  if (Value) {
+    selectQuery += " AND Value = ?";
+    queryParams.push(Value);
+  }
+
+  if (Name) {
+    selectQuery += " AND Name = ?";
+    queryParams.push(Name);
+  }
+
+  Database_Kpi.query(selectQuery, queryParams, (err, result) => {
+    if (err) {
+      console.error("Error fetching data:", err);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while fetching data." });
+    }
+
+    const formattedData = [];
+    let currentEmpid = null;
+    let currentValue = null;
+    let currentName = null;
+
+    result.forEach((item) => {
+      if (
+        currentEmpid !== item.Empid ||
+        currentValue !== item.Value ||
+        currentName !== item.Name
+      ) {
+        currentEmpid = item.Empid;
+        currentValue = item.Value;
+        currentName = item.Name;
+
+        formattedData.push({
+          Empid: item.Empid,
+          Empname: item.Empname,
+          Value: item.Value,
+          Name: item.Name,
+          Data: [],
+        });
+      }
+
+      const lastIndex = formattedData.length - 1;
+      formattedData[lastIndex].Data.push({
+        Metric: item.Metric,
+        QuantityTarget: item.QuantityTarget,
+        QuantityAchieved: item.QuantityAchieved,
+        IndexKpi: item.IndexKpi,
+        Comments: item.Comments,
+        DirectorRating: item.DirectorRating,
+        DirectorComments: item.DirectorComments,
+      });
+    });
+
+    return res.json({ success: true, data: formattedData });
+  });
+};
+const Manager_Director_Data_Update = (req, res) => {
+  const { Data } = req.body;
+  const { Value, Name, Empid } = req.params;
+
+  if (!Value || !Name || !Empid || !Data || !Array.isArray(Data)) {
+    return res.status(400).json({ error: "Invalid request data" });
+  }
+
+  const updateQuery = `
+        UPDATE all_datastored_directordata_table
+        SET DirectorRating = ?,
+        DirectorComments =?
+        WHERE Empid = ? AND Value = ? AND Name = ? AND Metric = ?`;
+
+  const promises = [];
+
+  Data.forEach((item) => {
+    const { Metric, DirectorRating, DirectorComments } = item;
+    promises.push(
+      new Promise((resolve, reject) => {
+        Database_Kpi.query(
+          updateQuery,
+          [DirectorRating, DirectorComments, Empid, Value, Name, Metric],
+          (err, result) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+      })
+    );
+  });
+
+  Promise.all(promises)
+    .then(() => {
+      return res.json({
+        success: true,
+        message: "Employee_Director_Data updated successfully",
+      });
+    })
+    .catch((err) => {
+      console.error("Error updating data:", err);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while updating data." });
+    });
 };
 
 //Director-Data
@@ -2879,6 +3351,190 @@ const Directror_All_Status_Retrive = (req, res) => {
     }
   });
 };
+
+//Director-Manager-Data
+const Director_Manager_Insert_Data = (req, res) => {
+  const data = req.body;
+  if (
+    !data ||
+    !data[0] ||
+    !data[0].Empid ||
+    !data[0].Empname ||
+    !data[0].data ||
+    !Array.isArray(data[0].data)
+  ) {
+    return res.status(400).json({ error: "Invalid request body" });
+  }
+  const values = [];
+
+  for (const entry of data[0].data) {
+    const { Value, valuecreater } = entry;
+    for (const category of valuecreater) {
+      const { name, questions } = category;
+      for (const question of questions) {
+        const {
+          Metric,
+          QuantityTarget,
+          QuantityAchieved,
+          IndexKpi,
+          Comments,
+          VpRating,
+          VpComments,
+        } = question;
+
+        values.push([
+          data[0].Empid,
+          data[0].Empname,
+          Value,
+          name,
+          Metric,
+          QuantityTarget,
+          QuantityAchieved,
+          IndexKpi,
+          Comments,
+          VpRating,
+          VpComments,
+        ]);
+      }
+    }
+  }
+  const insertQuery = `INSERT INTO all_datastored_vptable_table (Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments,VpRating,VpComments) VALUES ?`;
+  Database_Kpi.query(insertQuery, [values], (err, result) => {
+    if (err) {
+      console.error("Error storing data:", err);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while storing data." });
+    }
+    return res.json({
+      success: true,
+      message: "Director_Manager_Data stored successfully",
+    });
+  });
+};
+
+const Director_Manager_Retrive_Data = (req, res) => {
+  const { Empid, Value, Name } = req.params;
+
+  let selectQuery = `
+        SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments,VpRating,VpComments
+        FROM all_datastored_vptable_table
+        WHERE 1`;
+
+  const queryParams = [];
+
+  if (Empid) {
+    selectQuery += " AND Empid = ?";
+    queryParams.push(Empid);
+  }
+
+  if (Value) {
+    selectQuery += " AND Value = ?";
+    queryParams.push(Value);
+  }
+
+  if (Name) {
+    selectQuery += " AND Name = ?";
+    queryParams.push(Name);
+  }
+
+  Database_Kpi.query(selectQuery, queryParams, (err, result) => {
+    if (err) {
+      console.error("Error fetching data:", err);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while fetching data." });
+    }
+
+    const formattedData = [];
+    let currentEmpid = null;
+    let currentValue = null;
+    let currentName = null;
+
+    result.forEach((item) => {
+      if (
+        currentEmpid !== item.Empid ||
+        currentValue !== item.Value ||
+        currentName !== item.Name
+      ) {
+        currentEmpid = item.Empid;
+        currentValue = item.Value;
+        currentName = item.Name;
+
+        formattedData.push({
+          Empid: item.Empid,
+          Empname: item.Empname,
+          Value: item.Value,
+          Name: item.Name,
+          Data: [],
+        });
+      }
+
+      const lastIndex = formattedData.length - 1;
+      formattedData[lastIndex].Data.push({
+        Metric: item.Metric,
+        QuantityTarget: item.QuantityTarget,
+        QuantityAchieved: item.QuantityAchieved,
+        IndexKpi: item.IndexKpi,
+        Comments: item.Comments,
+        VpRating: item.VpRating,
+        VpComments: item.VpComments,
+      });
+    });
+
+    return res.json({ success: true, data: formattedData });
+  });
+};
+const Director_Manager_Data_Update = (req, res) => {
+  const { Data } = req.body;
+  const { Value, Name, Empid } = req.params;
+
+  if (!Value || !Name || !Empid || !Data || !Array.isArray(Data)) {
+    return res.status(400).json({ error: "Invalid request data" });
+  }
+
+  const updateQuery = `
+        UPDATE all_datastored_vptable_table
+        SET VpRating = ?,
+        VpComments =?
+        WHERE Empid = ? AND Value = ? AND Name = ? AND Metric = ?`;
+
+  const promises = [];
+
+  Data.forEach((item) => {
+    const { Metric, VpRating, VpComments } = item;
+    promises.push(
+      new Promise((resolve, reject) => {
+        Database_Kpi.query(
+          updateQuery,
+          [VpRating, VpComments, Empid, Value, Name, Metric],
+          (err, result) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+      })
+    );
+  });
+
+  Promise.all(promises)
+    .then(() => {
+      return res.json({
+        success: true,
+        message: "Director_Manager_Data updated successfully",
+      });
+    })
+    .catch((err) => {
+      console.error("Error updating data:", err);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while updating data." });
+    });
+};
+
 module.exports = {
   AdminPost,
   AdminloginPost,
@@ -2927,5 +3583,17 @@ module.exports = {
   Director_Data_Update,
   Director_Status_Update,
   Director_Retrive_Data,
-  Directror_All_Status_Retrive
+  Directror_All_Status_Retrive,
+  Employee_And_Manager_Insert_Data,
+  Employee_And_Manager_Retrive_Data,
+  Employee_And_Manager_Data_Update,
+  Employee_And_Director_Insert_Data,
+  Employee_And_Director_Retrive_Data,
+  Employee_And_Director_Data_Update,
+  Manager_Director_Insert_Data,
+  Manager_Director_Retrive_Data,
+  Manager_Director_Data_Update,
+  Director_Manager_Insert_Data,
+  Director_Manager_Retrive_Data,
+  Director_Manager_Data_Update
 };

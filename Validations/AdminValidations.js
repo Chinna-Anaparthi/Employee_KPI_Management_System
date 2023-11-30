@@ -15,12 +15,12 @@ const KPISchema = joi.object({
   }),
   adminEmail: joi
     .string()
-    .email({
-      minDomainSegments: 2,
-      tlds: {
-        allow: ["com", "yahoo"],
-      },
-    })
+    // .email({
+    //   minDomainSegments: 2,
+    //   tlds: {
+    //     allow: ["com", "yahoo"],
+    //   },
+    // })
     .required()
     .messages({
       "string.email": "User adminEmail invalid",

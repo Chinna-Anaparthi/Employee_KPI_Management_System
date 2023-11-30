@@ -3412,7 +3412,6 @@ const Director_Manager_Insert_Data = (req, res) => {
     });
   });
 };
-
 const Director_Manager_Retrive_Data = (req, res) => {
   const { Empid, Value, Name } = req.params;
 

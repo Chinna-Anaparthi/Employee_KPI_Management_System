@@ -9,6 +9,7 @@ app.use(parser.json());
 const cors = require("cors");
 app.use(cors());
 const port = 4000;
+const ip = '172.17.15.150';
 //Send-verify-Email
 
 app.post('/api/send_otp', (req, res) => {
@@ -169,7 +170,7 @@ app.put("/api/emp_director_upd/:Empid/:Value?/:Name?", (req, res, next) => {
 });
 
 //Manager-Data
-app.post("/api/manager_insert", (req, res, next) => {
+app.post("/api/manager_insrt", (req, res, next) => {
   Server_Logic.Manager_Insert_Data(req, res, () => { });
 });
 app.get("/api/manager_data/:Empid/:Value?/:Name?", (req, res, next) => {

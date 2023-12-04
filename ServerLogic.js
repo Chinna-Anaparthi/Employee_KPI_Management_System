@@ -153,89 +153,69 @@ const Admin_Employee_Insert_Data = (req, res) => {
   try {
     const data = req.body;
     if (Array.isArray(data) && data.length > 0) {
-      for (const entry of data) {
-        const adminID = entry.adminID;
-        const entryData = entry.data;
-        if (Array.isArray(entryData) && entryData.length > 0) {
-          for (const categoryData of entryData) {
-            for (const entry in data) {
-              const adminID = data[entry].adminID;
+        for (const entry of data) {
+            const adminID = entry.adminID;
+            const entryData = entry.data;
 
-              for (const categoryData of data[entry].data) {
-                for (const categoryName in categoryData) {
-                  const subcategories = categoryData[categoryName];
+            if (Array.isArray(entryData) && entryData.length > 0) {
+                for (const categoryData of entryData) {
 
-                  for (const subcategory of subcategories) {
-                    const subcategoryName = subcategory.Name;
+                    for (const entry in data) {
+                        const adminID = data[entry].adminID;
 
-                    if (subcategory.Questions && subcategory.QuantityTarget) {
-                      for (let i = 0; i < subcategory.Questions.length; i++) {
-                        const question = subcategory.Questions[i];
-                        const quantityTarget = subcategory.QuantityTarget[i];
-                        const checkQuery = `SELECT * FROM admin_data_employee_table WHERE adminID = ? AND Category = ? AND Name = ? AND Questions = ?`;
-                        Database_Kpi.query(
-                          checkQuery,
-                          [adminID, categoryName, subcategoryName, question],
-                          (err, results) => {
-                            if (err) {
-                              console.error(err);
-                            } else {
-                              if (results.length > 0) {
-                                const updateQuery = `UPDATE admin_data_employee_table SET QuantityTarget = ? WHERE adminID = ? AND Category = ? AND Name = ? AND Questions = ?`;
-                                Database_Kpi.query(
-                                  updateQuery,
-                                  [
-                                    quantityTarget,
-                                    adminID,
-                                    categoryName,
-                                    subcategoryName,
-                                    question,
-                                  ],
-                                  (err, results) => {
-                                    if (err) {
-                                      console.error(err);
+                        for (const categoryData of data[entry].data) {
+                            for (const categoryName in categoryData) {
+                                const subcategories = categoryData[categoryName];
+
+                                for (const subcategory of subcategories) {
+                                    const subcategoryName = subcategory.Name;
+
+                                    if (subcategory.Questions && subcategory.QuantityTarget) {
+                                        for (let i = 0; i < subcategory.Questions.length; i++) {
+                                            const question = subcategory.Questions[i];
+                                            const quantityTarget = subcategory.QuantityTarget[i];
+
+                                            // Check if a similar entry already exists in the database
+                                            const checkQuery = `SELECT * FROM admin_data_employee_table WHERE adminID = ? AND Category = ? AND Name = ? AND Questions = ?`;
+                                            Database_Kpi.query(checkQuery, [adminID, categoryName, subcategoryName, question], (err, results) => {
+                                                if (err) {
+                                                    console.error(err);
+                                                } else {
+                                                    if (results.length > 0) {
+                                                        // Entry already exists, update it
+                                                        const updateQuery = `UPDATE admin_data_employee_table SET QuantityTarget = ? WHERE adminID = ? AND Category = ? AND Name = ? AND Questions = ?`;
+                                                        Database_Kpi.query(updateQuery, [quantityTarget, adminID, categoryName, subcategoryName, question], (err, results) => {
+                                                            if (err) {
+                                                                console.error(err);
+                                                            }
+                                                        });
+                                                    } else {
+                                                        // Entry doesn't exist, insert a new one
+                                                        const insertQuery = `INSERT INTO admin_data_employee_table (adminID, Category, Name, Questions, QuantityTarget) VALUES (?, ?, ?, ?, ?)`;
+                                                        Database_Kpi.query(insertQuery, [adminID, categoryName, subcategoryName, question, quantityTarget], (err, results) => {
+                                                            if (err) {
+                                                                console.error(err);
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            });
+                                        }
                                     }
-                                  }
-                                );
-                              } else {
-                                const insertQuery = `INSERT INTO admin_data_employee_table (adminID, Category, Name, Questions, QuantityTarget) VALUES (?, ?, ?, ?, ?)`;
-                                Database_Kpi.query(
-                                  insertQuery,
-                                  [
-                                    adminID,
-                                    categoryName,
-                                    subcategoryName,
-                                    question,
-                                    quantityTarget,
-                                  ],
-                                  (err, results) => {
-                                    if (err) {
-                                      console.error(err);
-                                    }
-                                  }
-                                );
-                              }
+                                }
                             }
-                          }
-                        );
-                      }
+                        }
                     }
-                  }
                 }
-              }
             }
-          }
         }
-      }
     }
 
-    return res
-      .status(201)
-      .json({ message: "admin employee metric insert successfully" });
-  } catch (error) {
+    return res.status(201).json({ message: 'admin employee metric inserted successfully' });
+} catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "An error occurred" });
-  }
+    return res.status(500).json({ error: 'An error occurred' });
+}
 };
 const Admin_Employee_Retrive_Data = (req, res) => {
   try {
@@ -335,89 +315,69 @@ const Admin_Manager_Insert_Data = (req, res) => {
   try {
     const data = req.body;
     if (Array.isArray(data) && data.length > 0) {
-      for (const entry of data) {
-        const adminID = entry.adminID;
-        const entryData = entry.data;
+        for (const entry of data) {
+            const adminID = entry.adminID;
+            const entryData = entry.data;
 
-        if (Array.isArray(entryData) && entryData.length > 0) {
-          for (const categoryData of entryData) {
-            for (const entry in data) {
-              const adminID = data[entry].adminID;
+            if (Array.isArray(entryData) && entryData.length > 0) {
+                for (const categoryData of entryData) {
 
-              for (const categoryData of data[entry].data) {
-                for (const categoryName in categoryData) {
-                  const subcategories = categoryData[categoryName];
+                    for (const entry in data) {
+                        const adminID = data[entry].adminID;
 
-                  for (const subcategory of subcategories) {
-                    const subcategoryName = subcategory.Name;
+                        for (const categoryData of data[entry].data) {
+                            for (const categoryName in categoryData) {
+                                const subcategories = categoryData[categoryName];
 
-                    if (subcategory.Questions && subcategory.QuantityTarget) {
-                      for (let i = 0; i < subcategory.Questions.length; i++) {
-                        const question = subcategory.Questions[i];
-                        const quantityTarget = subcategory.QuantityTarget[i];
-                        const checkQuery = `SELECT * FROM admin_data_manager_table WHERE adminID = ? AND Category = ? AND Name = ? AND Questions = ?`;
-                        Database_Kpi.query(
-                          checkQuery,
-                          [adminID, categoryName, subcategoryName, question],
-                          (err, results) => {
-                            if (err) {
-                              console.error(err);
-                            } else {
-                              if (results.length > 0) {
-                                const updateQuery = `UPDATE admin_data_manager_table SET QuantityTarget = ? WHERE adminID = ? AND Category = ? AND Name = ? AND Questions = ?`;
-                                Database_Kpi.query(
-                                  updateQuery,
-                                  [
-                                    quantityTarget,
-                                    adminID,
-                                    categoryName,
-                                    subcategoryName,
-                                    question,
-                                  ],
-                                  (err, results) => {
-                                    if (err) {
-                                      console.error(err);
+                                for (const subcategory of subcategories) {
+                                    const subcategoryName = subcategory.Name;
+
+                                    if (subcategory.Questions && subcategory.QuantityTarget) {
+                                        for (let i = 0; i < subcategory.Questions.length; i++) {
+                                            const question = subcategory.Questions[i];
+                                            const quantityTarget = subcategory.QuantityTarget[i];
+
+                                            // Check if a similar entry already exists in the database
+                                            const checkQuery = `SELECT * FROM admin_data_manager_table WHERE adminID = ? AND Category = ? AND Name = ? AND Questions = ?`;
+                                            Database_Kpi.query(checkQuery, [adminID, categoryName, subcategoryName, question], (err, results) => {
+                                                if (err) {
+                                                    console.error(err);
+                                                } else {
+                                                    if (results.length > 0) {
+                                                        // Entry already exists, update it
+                                                        const updateQuery = `UPDATE admin_data_manager_table SET QuantityTarget = ? WHERE adminID = ? AND Category = ? AND Name = ? AND Questions = ?`;
+                                                        Database_Kpi.query(updateQuery, [quantityTarget, adminID, categoryName, subcategoryName, question], (err, results) => {
+                                                            if (err) {
+                                                                console.error(err);
+                                                            }
+                                                        });
+                                                    } else {
+                                                        // Entry doesn't exist, insert a new one
+                                                        const insertQuery = `INSERT INTO admin_data_manager_table (adminID, Category, Name, Questions, QuantityTarget) VALUES (?, ?, ?, ?, ?)`;
+                                                        Database_Kpi.query(insertQuery, [adminID, categoryName, subcategoryName, question, quantityTarget], (err, results) => {
+                                                            if (err) {
+                                                                console.error(err);
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            });
+                                        }
                                     }
-                                  }
-                                );
-                              } else {
-                                const insertQuery = `INSERT INTO admin_data_manager_table (adminID, Category, Name, Questions, QuantityTarget) VALUES (?, ?, ?, ?, ?)`;
-                                Database_Kpi.query(
-                                  insertQuery,
-                                  [
-                                    adminID,
-                                    categoryName,
-                                    subcategoryName,
-                                    question,
-                                    quantityTarget,
-                                  ],
-                                  (err, results) => {
-                                    if (err) {
-                                      console.error(err);
-                                    }
-                                  }
-                                );
-                              }
+                                }
                             }
-                          }
-                        );
-                      }
+                        }
                     }
-                  }
                 }
-              }
             }
-          }
         }
-      }
     }
-    return res
-      .status(201)
-      .json({ message: "admin manager metric insert successfully" });
-  } catch (error) {
+
+    return res.status(201).json({ message: 'admin manager metric inserted successfully' });
+} catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "An error occurred" });
-  }
+    return res.status(500).json({ error: 'An error occurred' });
+}
 };
 const Admin_Manager_Retrive_Data = (req, res) => {
   try {
@@ -519,89 +479,69 @@ const Admin_Director_Insert_Data = (req, res) => {
   try {
     const data = req.body;
     if (Array.isArray(data) && data.length > 0) {
-      for (const entry of data) {
-        const adminID = entry.adminID;
-        const entryData = entry.data;
+        for (const entry of data) {
+            const adminID = entry.adminID;
+            const entryData = entry.data;
 
-        if (Array.isArray(entryData) && entryData.length > 0) {
-          for (const categoryData of entryData) {
-            for (const entry in data) {
-              const adminID = data[entry].adminID;
+            if (Array.isArray(entryData) && entryData.length > 0) {
+                for (const categoryData of entryData) {
 
-              for (const categoryData of data[entry].data) {
-                for (const categoryName in categoryData) {
-                  const subcategories = categoryData[categoryName];
+                    for (const entry in data) {
+                        const adminID = data[entry].adminID;
 
-                  for (const subcategory of subcategories) {
-                    const subcategoryName = subcategory.Name;
+                        for (const categoryData of data[entry].data) {
+                            for (const categoryName in categoryData) {
+                                const subcategories = categoryData[categoryName];
 
-                    if (subcategory.Questions && subcategory.QuantityTarget) {
-                      for (let i = 0; i < subcategory.Questions.length; i++) {
-                        const question = subcategory.Questions[i];
-                        const quantityTarget = subcategory.QuantityTarget[i];
-                        const checkQuery = `SELECT * FROM admin_data_director_table WHERE adminID = ? AND Category = ? AND Name = ? AND Questions = ?`;
-                        Database_Kpi.query(
-                          checkQuery,
-                          [adminID, categoryName, subcategoryName, question],
-                          (err, results) => {
-                            if (err) {
-                              console.error(err);
-                            } else {
-                              if (results.length > 0) {
-                                const updateQuery = `UPDATE admin_data_director_table SET QuantityTarget = ? WHERE adminID = ? AND Category = ? AND Name = ? AND Questions = ?`;
-                                Database_Kpi.query(
-                                  updateQuery,
-                                  [
-                                    quantityTarget,
-                                    adminID,
-                                    categoryName,
-                                    subcategoryName,
-                                    question,
-                                  ],
-                                  (err, results) => {
-                                    if (err) {
-                                      console.error(err);
+                                for (const subcategory of subcategories) {
+                                    const subcategoryName = subcategory.Name;
+
+                                    if (subcategory.Questions && subcategory.QuantityTarget) {
+                                        for (let i = 0; i < subcategory.Questions.length; i++) {
+                                            const question = subcategory.Questions[i];
+                                            const quantityTarget = subcategory.QuantityTarget[i];
+
+                                            // Check if a similar entry already exists in the database
+                                            const checkQuery = `SELECT * FROM admin_data_director_table WHERE adminID = ? AND Category = ? AND Name = ? AND Questions = ?`;
+                                            Database_Kpi.query(checkQuery, [adminID, categoryName, subcategoryName, question], (err, results) => {
+                                                if (err) {
+                                                    console.error(err);
+                                                } else {
+                                                    if (results.length > 0) {
+                                                        // Entry already exists, update it
+                                                        const updateQuery = `UPDATE admin_data_director_table SET QuantityTarget = ? WHERE adminID = ? AND Category = ? AND Name = ? AND Questions = ?`;
+                                                        Database_Kpi.query(updateQuery, [quantityTarget, adminID, categoryName, subcategoryName, question], (err, results) => {
+                                                            if (err) {
+                                                                console.error(err);
+                                                            }
+                                                        });
+                                                    } else {
+                                                        // Entry doesn't exist, insert a new one
+                                                        const insertQuery = `INSERT INTO admin_data_director_table (adminID, Category, Name, Questions, QuantityTarget) VALUES (?, ?, ?, ?, ?)`;
+                                                        Database_Kpi.query(insertQuery, [adminID, categoryName, subcategoryName, question, quantityTarget], (err, results) => {
+                                                            if (err) {
+                                                                console.error(err);
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            });
+                                        }
                                     }
-                                  }
-                                );
-                              } else {
-                                const insertQuery = `INSERT INTO admin_data_director_table (adminID, Category, Name, Questions, QuantityTarget) VALUES (?, ?, ?, ?, ?)`;
-                                Database_Kpi.query(
-                                  insertQuery,
-                                  [
-                                    adminID,
-                                    categoryName,
-                                    subcategoryName,
-                                    question,
-                                    quantityTarget,
-                                  ],
-                                  (err, results) => {
-                                    if (err) {
-                                      console.error(err);
-                                    }
-                                  }
-                                );
-                              }
+                                }
                             }
-                          }
-                        );
-                      }
+                        }
                     }
-                  }
                 }
-              }
             }
-          }
         }
-      }
     }
-    return res
-      .status(201)
-      .json({ message: "admin director metric insert successfully" });
-  } catch (error) {
+
+    return res.status(201).json({ message: 'admin director metric inserted successfully' });
+} catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "An error occurred" });
-  }
+    return res.status(500).json({ error: 'An error occurred' });
+}
 };
 const Admin_Director_Retrive_Data = (req, res) => {
   try {

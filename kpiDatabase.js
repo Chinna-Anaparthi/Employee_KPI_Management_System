@@ -7,6 +7,7 @@ const pool = mysql.createPool({
     user: process.env.USER,
     password: process.env.PASSWORD,
     database: process.env.DATABASE,
+    port:process.env.PORT,
     waitForConnections: true,
     // connectionLimit: 10, // Adjust the limit based on your application needs
     // queueLimit: 0

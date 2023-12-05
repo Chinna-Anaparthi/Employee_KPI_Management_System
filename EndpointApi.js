@@ -9,7 +9,7 @@ app.use(parser.json());
 const cors = require("cors");
 app.use(cors());
 const port = 4000;
-const ip = '172.17.15.150';
+// const ip = '172.17.15.150';
 //Send-verify-Email
 
 app.post('/api/send_otp', (req, res) => {

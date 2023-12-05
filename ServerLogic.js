@@ -930,7 +930,7 @@ const Save_Manager_Insert_Data = (req, res) => {
     }
     return res.json({
       success: true,
-      message: "Save_Manager_Data stored successfully",
+      message: "Save_manager_Data stored successfully",
     });
   });
 };

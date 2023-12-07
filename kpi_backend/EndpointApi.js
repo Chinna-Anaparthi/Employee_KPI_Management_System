@@ -8,8 +8,6 @@ app.use(parser.urlencoded({ extended: true }));
 app.use(parser.json());
 const cors = require("cors");
 app.use(cors());
-const port = 4000;
-// const ip = '172.17.15.150';
 //Send-verify-Email
 
 app.post('/api/send_otp', (req, res) => {
@@ -140,7 +138,7 @@ app.put("/api/emp_upd/:Empid/:Value?/:Name?", (req, res, next) => {
 app.get("/api/emp_all_data/:Empid?/:Value?/:Name?", (req, res, next) => {
   Server_Logic.Employee_All_Data_Retrieve(req, res, () => {});
 });
-app.put("api/emp_status_upd/:Empid", (req, res, next) => {
+app.put("/api/emp_status_upd/:Empid", (req, res, next) => {
   Server_Logic.Employee_Status_Update(req, res, () => {});
 });
 app.get("/api/emp_all_status_data/:Empid?", (req, res, next) => {
@@ -232,6 +230,6 @@ app.put("/api/director_manager_upd/:Empid/:Value?/:Name?", (req, res, next) => {
 });
 
 
-app.listen(port,  () => {
-  console.log(`Server listening on port http://localhost:${port}`);
+app.listen(4000, () => {
+  console.log(`Server listening on port http://localhost:4000`);
 });

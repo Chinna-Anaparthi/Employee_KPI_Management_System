@@ -3474,6 +3474,10 @@ const Director_Manager_Data_Update = (req, res) => {
     });
 };
 
+
+
+
+
 module.exports = {
   AdminPost,
   AdminloginPost,

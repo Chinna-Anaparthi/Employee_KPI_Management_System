@@ -1603,16 +1603,16 @@ const PasswordUpdate = (req, res) => {
   });
 };
 const ImageUpdate = (req, res) => {
-  const { FirstName, LastName } = req.params;
+  const { Empid } = req.params;
   const {Image}=req.body;
-  if (!FirstName || !LastName) {
+  if (!Empid) {
     return res
       .status(400)
       .json({ error: "FirstName and LastName are required." });
   }
   const updateQuery =
-    "UPDATE employeeregister_data SET Image = ? WHERE FirstName = ? AND LastName = ?";
-  const updateValues = [Image, FirstName, LastName];
+    "UPDATE employeeregister_data SET Image = ? WHERE Empid = ? ";
+  const updateValues = [Image, Empid];
 
   Database_Kpi.query(updateQuery, updateValues, (updateErr, updateResults) => {
     if (updateErr) {

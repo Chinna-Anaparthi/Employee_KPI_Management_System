@@ -1451,7 +1451,7 @@ const registrationPost = (req, res) => {
 
     if (checkResults.length > 0) {
       return res
-        .status(400)
+        .status(500)
         .json({
           error: "User with the same Empid or Empmail already registered.",
         });

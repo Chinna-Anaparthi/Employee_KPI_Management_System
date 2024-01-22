@@ -1443,7 +1443,7 @@ const registrationPost = (req, res) => {
     if (checkErr) {
       console.error(checkErr);
       return res
-        .status(500)
+        .status(200)
         .json({
           error: "An error occurred while checking for existing records.",
         });
@@ -1451,7 +1451,7 @@ const registrationPost = (req, res) => {
 
     if (checkResults.length > 0) {
       return res
-        .status(500)
+        .status(200)
         .json({
           error: "User with the same Empid or Empmail already registered.",
         });
@@ -1489,10 +1489,10 @@ const registrationPost = (req, res) => {
       if (err) {
         console.error(err);
         return res
-          .status(500)
+          .status(200)
           .json({ error: "An error occurred while registering the employee." });
       }
-      return res.json({ message: "Employee successfully registered." });
+      return res.status(200).json({ message: "Employee successfully registered." });
     });
   });
 };

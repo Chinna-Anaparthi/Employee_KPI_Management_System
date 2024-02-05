@@ -1443,7 +1443,7 @@ const registrationPost = (req, res) => {
     if (checkErr) {
       console.error(checkErr);
       return res
-        .status(500)
+        .status(200)
         .json({
           error: "An error occurred while checking for existing records.",
         });
@@ -1451,7 +1451,7 @@ const registrationPost = (req, res) => {
 
     if (checkResults.length > 0) {
       return res
-        .status(400)
+        .status(200)
         .json({
           error: "User with the same Empid or Empmail already registered.",
         });
@@ -1489,10 +1489,10 @@ const registrationPost = (req, res) => {
       if (err) {
         console.error(err);
         return res
-          .status(500)
+          .status(200)
           .json({ error: "An error occurred while registering the employee." });
       }
-      return res.json({ message: "Employee successfully registered." });
+      return res.status(200).json({ message: "Employee successfully registered." });
     });
   });
 };
@@ -1603,16 +1603,16 @@ const PasswordUpdate = (req, res) => {
   });
 };
 const ImageUpdate = (req, res) => {
-  const { FirstName, LastName } = req.params;
+  const { Empid } = req.params;
   const {Image}=req.body;
-  if (!FirstName || !LastName) {
+  if (!Empid) {
     return res
       .status(400)
       .json({ error: "FirstName and LastName are required." });
   }
   const updateQuery =
-    "UPDATE employeeregister_data SET Image = ? WHERE FirstName = ? AND LastName = ?";
-  const updateValues = [Image, FirstName, LastName];
+    "UPDATE employeeregister_data SET Image = ? WHERE Empid = ? ";
+  const updateValues = [Image, Empid];
 
   Database_Kpi.query(updateQuery, updateValues, (updateErr, updateResults) => {
     if (updateErr) {

@@ -4,10 +4,12 @@ const Database_Kpi = require("./kpiDatabase");
 const app = express();
 var parser = require("body-parser");
 app.use(express.json({ limit: "10mb" }));
-app.use(parser.urlencoded({ extended: true }));
+  app.use(parser.urlencoded({ extended: true }));
 app.use(parser.json());
 const cors = require("cors");
 app.use(cors());
+const ip="172.17.15.150"
+const port="4000";
 //Send-verify-Email
 
 app.post('/api/send_otp', (req, res) => {
@@ -77,7 +79,7 @@ app.post("/save/emp_insrt", (req, res, next) => {
 app.get("/save/emp_data/:Empid?/:Value?/:Name?", (req, res, next) => {
   Server_Logic.Save_Employee_Retrive_Data(req, res, () => {});
 });
-app.put("/save_emp_upd/:Empid", (req, res, next) => {
+app.put("/save/emp_upd/:Empid", (req, res, next) => {
   Server_Logic.Save_Employee_Data_Update(req, res, () => {});
 });
 app.delete("/save/emp_del/:Empid", (req, res, next) => {
@@ -230,6 +232,6 @@ app.put("/api/director_manager_upd/:Empid/:Value?/:Name?", (req, res, next) => {
 });
 
 
-app.listen(4000, () => {
-  console.log(`Server listening on port http://localhost:4000`);
+app.listen(port, ip, () => {
+  console.log(`Server listening on port http://${ip}:${port}`);
 });

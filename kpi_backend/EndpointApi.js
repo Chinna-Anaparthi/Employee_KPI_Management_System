@@ -8,11 +8,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(parser.json());
 const cors = require("cors");
 app.use(cors());
-<<<<<<< HEAD
-const ip="172.17.15.150"
-=======
 // const ip="172.17.15.150"
->>>>>>> 0e3c026073db9385e53c07f316565d50778f08a1
 const port="4000";
 //Send-verify-Email
 
@@ -127,7 +123,7 @@ app.get("/api/emp_data/:Empid?", (req, res, next) => {
 app.put("/api/emp_password_upd", (req, res, next) => {
   Server_Logic.PasswordUpdate(req, res, () => {});
 });
-app.post("/api/emp_image_upd/:Empid", (req, res) => {
+app.post("/api/emp_image_upd/:FirstName/:LastName", (req, res) => {
   Server_Logic.ImageUpdate(req, res, () => {});
 });
 
@@ -236,11 +232,6 @@ app.put("/api/director_manager_upd/:Empid/:Value?/:Name?", (req, res, next) => {
 });
 
 
-<<<<<<< HEAD
-app.listen(port, ip, () => {
-  console.log(`Server listening on port http://${ip}:${port}`);
-=======
 app.listen(port, () => {
   console.log(`Server listening on port http://localhost:${port}`);
->>>>>>> 0e3c026073db9385e53c07f316565d50778f08a1
 });

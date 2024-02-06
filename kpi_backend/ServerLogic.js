@@ -738,6 +738,7 @@ const Save_Employee_Retrive_Data = (req, res) => {
       const employeeData = {
         Empid: result[0].Empid,
         Empname: result[0].Empname,
+        Emptime:result[0].Emptime,
         ratings: result.map((row) => ({
           Value: row.Value,
           Name: row.Name,
@@ -745,7 +746,7 @@ const Save_Employee_Retrive_Data = (req, res) => {
           QuantityTarget: row.QuantityTarget,
           QuantityAchieved: row.QuantityAchieved,
           IndexKpi: row.IndexKpi,
-          Comments: row.Comments,
+          Comments: row.Comments
         })),
       };
 
@@ -766,6 +767,7 @@ const Save_Employee_Retrive_Data = (req, res) => {
           employeesData[row.Empid] = {
             Empid: row.Empid,
             Empname: row.Empname,
+            Emptime:result[0].Emptime,
             ratings: [],
           };
         }
@@ -777,6 +779,7 @@ const Save_Employee_Retrive_Data = (req, res) => {
           QuantityAchieved: row.QuantityAchieved,
           IndexKpi: row.IndexKpi,
           Comments: row.Comments,
+         
         });
       });
 
@@ -981,6 +984,7 @@ const Save_Manager_Retrive_Data = (req, res) => {
       const employeeData = {
         Empid: result[0].Empid,
         Empname: result[0].Empname,
+        Emptime:result[0].Emptime,
         ratings: result.map((row) => ({
           Value: row.Value,
           Name: row.Name,
@@ -1009,6 +1013,7 @@ const Save_Manager_Retrive_Data = (req, res) => {
           employeesData[row.Empid] = {
             Empid: row.Empid,
             Empname: row.Empname,
+            Emptime:row.Emptime,
             ratings: [],
           };
         }
@@ -1230,6 +1235,7 @@ const Save_Director_Retrive_Data =(req,res)=>
       const employeeData = {
         Empid: result[0].Empid,
         Empname: result[0].Empname,
+        Emptime:result[0].Emptime,
         ratings: result.map((row) => ({
           Value: row.Value,
           Name: row.Name,
@@ -1258,6 +1264,7 @@ const Save_Director_Retrive_Data =(req,res)=>
           employeesData[row.Empid] = {
             Empid: row.Empid,
             Empname: row.Empname,
+            Emptime:row.Emptime,
             ratings: [],
           };
         }
@@ -1688,9 +1695,7 @@ const Employee_Retrive_Data = (req, res) => {
   const { Empid, Value, Name } = req.params;
 
   let selectQuery = `
-        SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments
-        FROM all_datastored_employeedata_table
-        WHERE 1`;
+        SELECT * FROM all_datastored_employeedata_table WHERE 1`;
 
   const queryParams = [];
 
@@ -1735,6 +1740,7 @@ const Employee_Retrive_Data = (req, res) => {
         formattedData.push({
           Empid: item.Empid,
           Empname: item.Empname,
+          Emptime:item.Emptime,
           Value: item.Value,
           Name: item.Name,
           Data: [],
@@ -2055,9 +2061,7 @@ const Employee_And_Manager_Retrive_Data = (req, res) => {
   const { Empid, Value, Name } = req.params;
   // const {Name}=req.params.Name || '';
   let selectQuery = `
-        SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments,ManagerRating,ManagerComments
-        FROM all_datastored_employeemanager_table
-        WHERE 1`;
+        SELECT * FROM all_datastored_employeemanager_table WHERE 1`;
 
   const queryParams = [];
 
@@ -2101,6 +2105,7 @@ const Employee_And_Manager_Retrive_Data = (req, res) => {
         formattedData.push({
           Empid: item.Empid,
           Empname: item.Empname,
+          Emptime:item.Emptime,
           Value: item.Value,
           Name: item.Name,
           Data: [],
@@ -2119,7 +2124,7 @@ const Employee_And_Manager_Retrive_Data = (req, res) => {
       });
     });
 
-    return res.json({ success: true, data: formattedData });
+    return res .status(200).json({ data: formattedData });
   });
 };
 const Employee_And_Manager_Data_Update = (req, res) => {
@@ -2240,9 +2245,7 @@ const Employee_And_Director_Retrive_Data = (req, res) => {
   const { Empid, Value, Name } = req.params;
 
   let selectQuery = `
-        SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments,ManagerRating,ManagerComments,DirectorRating,DirectorComments
-        FROM all_datastored_employeedirector_table
-        WHERE 1`;
+        SELECT * FROM all_datastored_employeedirector_table WHERE 1`;
 
   const queryParams = [];
 
@@ -2287,6 +2290,7 @@ const Employee_And_Director_Retrive_Data = (req, res) => {
         formattedData.push({
           Empid: item.Empid,
           Empname: item.Empname,
+          Emptime:item.Emptime,
           Value: item.Value,
           Name: item.Name,
           Data: [],
@@ -2431,9 +2435,7 @@ const Manager_Retrive_Data = (req, res) => {
   const { Empid, Value, Name } = req.params;
 
   let selectQuery = `
-        SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments
-        FROM all_datastored_managerdata_table
-        WHERE 1`;
+        SELECT * FROM all_datastored_managerdata_table WHERE 1`;
 
   const queryParams = [];
 
@@ -2478,6 +2480,7 @@ const Manager_Retrive_Data = (req, res) => {
         formattedData.push({
           Empid: item.Empid,
           Empname: item.Empname,
+          Emptime:item.Emptime,
           Value: item.Value,
           Name: item.Name,
           Data: [],
@@ -2550,8 +2553,7 @@ const Manager_Data_Update = (req, res) => {
 const Manager_All_Data_Retrieve = (req, res) => {
   const { Empid, Value, Name } = req.params;
   let query = `
-    SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments
-    FROM all_datastored_managerdata_table`;
+    SELECT * FROM all_datastored_managerdata_table`;
 
   const queryParams = [];
 
@@ -2595,6 +2597,7 @@ const Manager_All_Data_Retrieve = (req, res) => {
       const employeeData = {
         Empid: result[0].Empid,
         Empname: result[0].Empname,
+        Emptime:result[0].Emptime,
         ratings: result.map((row) => ({
           Value: row.Value,
           Name: row.Name,
@@ -2613,6 +2616,7 @@ const Manager_All_Data_Retrieve = (req, res) => {
           employeesData[row.Empid] = {
             Empid: row.Empid,
             Empname: row.Empname,
+            Emptime:row.Emptime,
             ratings: [],
           };
         }
@@ -2799,9 +2803,7 @@ const Manager_Director_Retrive_Data = (req, res) => {
   const { Empid, Value, Name } = req.params;
 
   let selectQuery = `
-        SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments,DirectorRating,DirectorComments
-        FROM all_datastored_directordata_table
-        WHERE 1`;
+        SELECT * FROM all_datastored_directordata_table WHERE 1`;
 
   const queryParams = [];
 
@@ -2847,6 +2849,7 @@ const Manager_Director_Retrive_Data = (req, res) => {
           Empid: item.Empid,
           Empname: item.Empname,
           Value: item.Value,
+          Emptime:item.Emptime,
           Name: item.Name,
           Data: [],
         });
@@ -2987,8 +2990,7 @@ const Director_Insert_Data = (req, res) => {
 const Director_All_Data_Retrive = (req, res) => {
   const { Empid, Value, Name } = req.params;
   let query = `
-    SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments
-    FROM all_datastored_directorform_table`;
+    SELECT * FROM all_datastored_directorform_table`;
 
   const queryParams = [];
 
@@ -3032,6 +3034,7 @@ const Director_All_Data_Retrive = (req, res) => {
       const employeeData = {
         Empid: result[0].Empid,
         Empname: result[0].Empname,
+        Emptime:result[0].Emptime,
         ratings: result.map((row) => ({
           Value: row.Value,
           Name: row.Name,
@@ -3050,6 +3053,7 @@ const Director_All_Data_Retrive = (req, res) => {
           employeesData[row.Empid] = {
             Empid: row.Empid,
             Empname: row.Empname,
+            Emptime:row.Emptime,
             ratings: [],
           };
         }
@@ -3172,9 +3176,7 @@ const Director_Retrive_Data = (req, res) => {
   const { Empid, Value, Name } = req.params;
 
   let selectQuery = `
-        SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments
-        FROM all_datastored_directorform_table
-        WHERE 1`;
+        SELECT * FROM all_datastored_directorform_table WHERE 1`;
 
   const queryParams = [];
 
@@ -3219,6 +3221,7 @@ const Director_Retrive_Data = (req, res) => {
         formattedData.push({
           Empid: item.Empid,
           Empname: item.Empname,
+          Emptime:item.Emptime,
           Value: item.Value,
           Name: item.Name,
           Data: [],
@@ -3356,9 +3359,7 @@ const Director_Manager_Retrive_Data = (req, res) => {
   const { Empid, Value, Name } = req.params;
 
   let selectQuery = `
-        SELECT Empid, Empname, Value, Name, Metric, QuantityTarget, QuantityAchieved, IndexKpi, Comments,VpRating,VpComments
-        FROM all_datastored_vptable_table
-        WHERE 1`;
+        SELECT * FROM all_datastored_vptable_table WHERE 1`;
 
   const queryParams = [];
 
@@ -3403,6 +3404,7 @@ const Director_Manager_Retrive_Data = (req, res) => {
         formattedData.push({
           Empid: item.Empid,
           Empname: item.Empname,
+          Emptime:item.Emptime,
           Value: item.Value,
           Name: item.Name,
           Data: [],

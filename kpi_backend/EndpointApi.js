@@ -8,7 +8,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(parser.json());
 const cors = require("cors");
 app.use(cors());
-// const ip="172.17.15.150"
+const ip="172.17.15.150"
 const port="4000";
 //Send-verify-Email
 
@@ -131,7 +131,7 @@ app.post("/api/emp_image_upd/:FirstName/:LastName", (req, res) => {
 app.post("/api/emp_insrt", (req, res, next) => {
   Server_Logic.Employee_Insert_Data(req, res, () => {});
 });
-app.get("/api/emp_userdata/:Empid/:Value?/:Name?", (req, res, next) => {
+app.get("/api/emp_userdata/:Empid?/:Value?/:Name?", (req, res, next) => {
   Server_Logic.Employee_Retrive_Data(req, res, () => {});
 });
 app.put("/api/emp_upd/:Empid/:Value?/:Name?", (req, res, next) => {
@@ -162,7 +162,7 @@ app.put("/api/emp_manager_upd/:Empid/:Value?/:Name?", (req, res, next) => {
 app.post("/api/emp_director_insrt", (req, res, next) => {
   Server_Logic.Employee_And_Director_Insert_Data(req, res, () => { });
 });
-app.get("/api/emp_director_data/:Empid/:Value?/:Name?", (req, res, next) => {
+app.get("/api/emp_director_data/:Empid?/:Value?/:Name?", (req, res, next) => {
   Server_Logic.Employee_And_Director_Retrive_Data(req, res, () => { });
 }); 
 app.put("/api/emp_director_upd/:Empid/:Value?/:Name?", (req, res, next) => {
@@ -173,7 +173,7 @@ app.put("/api/emp_director_upd/:Empid/:Value?/:Name?", (req, res, next) => {
 app.post("/api/manager_insrt", (req, res, next) => {
   Server_Logic.Manager_Insert_Data(req, res, () => { });
 });
-app.get("/api/manager_data/:Empid/:Value?/:Name?", (req, res, next) => {
+app.get("/api/manager_data/:Empid?/:Value?/:Name?", (req, res, next) => {
   Server_Logic.Manager_Retrive_Data(req, res, () => { });
 });
 app.put("/api/manager_upd/:Empid/:Value?/:Name?", (req, res, next) => {
@@ -232,6 +232,6 @@ app.put("/api/director_manager_upd/:Empid/:Value?/:Name?", (req, res, next) => {
 });
 
 
-app.listen(port, () => {
-  console.log(`Server listening on port http://localhost:${port}`);
+app.listen(port,ip, () => {
+  console.log(`Server listening on port http://${ip}:${port}`);
 });

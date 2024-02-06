@@ -1857,6 +1857,7 @@ const Employee_All_Data_Retrieve = (req, res) => {
       const employeeData = {
         Empid: result[0].Empid,
         Empname: result[0].Empname,
+        Emptime:result[0].Emptime,
         ratings: result.map((row) => ({
           Value: row.Value,
           Name: row.Name,
@@ -1875,6 +1876,7 @@ const Employee_All_Data_Retrieve = (req, res) => {
           employeesData[row.Empid] = {
             Empid: row.Empid,
             Empname: row.Empname,
+            Emptime:row.Emptime,
             ratings: [],
           };
         }

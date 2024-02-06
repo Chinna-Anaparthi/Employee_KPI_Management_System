@@ -8,7 +8,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(parser.json());
 const cors = require("cors");
 app.use(cors());
-const ip="172.17.15.150"
+// const ip="172.17.15.150"
 const port="4000";
 //Send-verify-Email
 
@@ -232,6 +232,6 @@ app.put("/api/director_manager_upd/:Empid/:Value?/:Name?", (req, res, next) => {
 });
 
 
-app.listen(port,ip, () => {
-  console.log(`Server listening on port http://${ip}:${port}`);
+app.listen(port, () => {
+  console.log(`Server listening on port http://localhost:${port}`);
 });
